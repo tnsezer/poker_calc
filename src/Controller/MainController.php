@@ -26,23 +26,26 @@ class MainController extends Controller
      * @Route("/", name="main")
      */
     public function main(){
-        $data = ['start' => 0];
 
-        return $this->render('main.html.twig', ['suits' => CardFactory::SUITS, 'ranks' => CardFactory::RANKS, 'data' => $data]);
+        return $this->render('main.html.twig', ['suits' => CardFactory::SUITS, 'ranks' => CardFactory::RANKS]);
     }
 
     /**
      * @Route("/start", name="start")
      */
     public function start(GameRepository $gameRepository, Request $request){
-        $card = $request->get("suit") . $request->get("rank");
-        $gameRepository->start($card);
-        $chance = $gameRepository->calculate();
+        $myCard = $request->get("suit") . $request->get("rank");
+        $gameRepository->start($myCard);
+        $chance = $gameRepository->calculateChance();
 
-        $data = ['start' => 1, 'card' => $card, 'chance' => $chance, 'selectedCard' => false];
+        $data = [
+            'card' => $myCard,
+            'selectedCard' => '-',
+            'chance' => $chance,
+            'win' => 0
+        ];
 
-        //return $this->json(['card' => $card]);
-        return $this->render('main.html.twig', ['data' => $data]);
+        return $this->render('draft.html.twig', ['data' => $data]);
     }
 
     /**
@@ -51,12 +54,17 @@ class MainController extends Controller
     public function draft(GameRepository $gameRepository){
         $card = $gameRepository->selectCard();
         $myCard = $gameRepository->myCard();
-        $compare = $gameRepository->compareCard($card);
-        $chance = $gameRepository->calculate();
+        $win = $gameRepository->compareCard($card);
+        $chance = $gameRepository->calculateChance();
 
-        $data = ['start' => ($compare ? 2 : 1), 'card' => $myCard, 'selectedCard' => $card, 'chance' => $chance];
+        $data = [
+            'card' => $myCard,
+            'selectedCard' => $card,
+            'chance' => $chance,
+            'win' => $win
+        ];
 
-        return $this->render('main.html.twig', ['data' => $data]);
+        return $this->render('draft.html.twig', ['data' => $data]);
     }
 
     /**

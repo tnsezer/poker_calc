@@ -5,10 +5,10 @@
  * Date: 23.07.2018
  * Time: 20:55
  */
-namespace App\DependencyInjection;
+namespace App\Entity;
 
-use App\DependencyInjection\Suit;
-use App\DependencyInjection\RankInterface;
+use App\Entity\Suit;
+use App\Entity\RankInterface;
 class Rank implements RankInterface
 {
     private $name;

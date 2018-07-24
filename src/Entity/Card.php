@@ -7,10 +7,10 @@
  */
 namespace App\Entity;
 
-use App\DependencyInjection\Suit;
-use App\DependencyInjection\Rank;
+use App\Entity\Suit;
+use App\Entity\Rank;
 
-class CardFactory
+class Card
 {
     const SUITS = ["D", "C", "H", "S"];
     const RANKS = [
@@ -29,13 +29,16 @@ class CardFactory
         "K"
     ];
 
-    public $deck = [];
+    private $deck = [];
 
     public function __construct()
     {
 
     }
 
+    /**
+     * @return array
+     */
     public function createDeck(){
         $this->deck = [];
         foreach (self::SUITS as $suit){
@@ -47,6 +50,33 @@ class CardFactory
 
         shuffle($this->deck);
 
+        return $this->deck;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function draftCard(){
+        $card = current($this->deck);
+        array_shift($this->deck);
+
+        return $card;
+    }
+
+    /**
+     * @param array $deck
+     * @return $this
+     */
+    public function set(array $deck){
+        $this->deck = $deck;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function get(){
         return $this->deck;
     }
 }

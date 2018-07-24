@@ -6,7 +6,7 @@
  * Time: 00:46
  */
 
-namespace App\DependencyInjection;
+namespace App\Entity;
 
 
 interface RankInterface

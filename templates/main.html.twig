@@ -1,7 +1,6 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    {%  if data.start == 0 %}
     <div id="area1">
         <form method="post" action="{{ url('start') }}" name="form1">
             <div>
@@ -29,27 +28,4 @@
             </div>
         </form>
     </div>
-    {% elseif data.start == 1 %}
-    <div id="area2">
-        <div>
-            <form action="{{ url('draft') }}" method="post">
-                <input type="submit" value="Draft" name="submit" /> (Chance %{{ data.chance }})
-            </form>
-        </div>
-        <div>Your card is: {{ data.card }}</div>
-        {% if data.selectedCard %}
-            <div>Selected card: {{ data.selectedCard }}</div>
-        {% endif %}
-    </div>
-    {% elseif data.start == 2 %}
-        <div>
-            Got it, the chance was (%{{ data.chance }})
-        </div>
-
-        <div>
-            <form action="{{ url('reset') }}" method="post">
-                <input type="submit" value="Reset to Step 1" name="submit" />
-            </form>
-        </div>
-    {% endif %}
 {% endblock %}

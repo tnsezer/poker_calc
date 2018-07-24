@@ -8,13 +8,17 @@
 namespace App\Repository;
 
 use Symfony\Component\HttpFoundation\Session\Session;
-use App\Entity\CardFactory;
+use App\Entity\Card;
+use App\Util\Calculator;
 
 class GameRepository
 {
     public $state = [];
     public $session;
 
+    /**
+     * GameRepository constructor.
+     */
     public function __construct()
     {
         $this->session =  new Session();
@@ -24,6 +28,9 @@ class GameRepository
         }
     }
 
+    /**
+     * @return bool
+     */
     public function reset(){
         $this->session->remove("state");
         $this->state = [];
@@ -31,8 +38,12 @@ class GameRepository
         return true;
     }
 
+    /**
+     * @param string $cardName
+     * @return array|mixed
+     */
     public function start(string $cardName){
-        $card = new CardFactory();
+        $card = new Card();
         $deck = $card->createDeck();
         $this->state = ['deck' => $deck, 'card' => $cardName, 'history' => []];
 
@@ -41,24 +52,44 @@ class GameRepository
         return $this->state;
     }
 
+    /**
+     * @return bool
+     */
     private function save(){
-        $this->session->set('state', json_encode($this->state));
+        if($this->session) {
+            return $this->session->set('state', json_encode($this->state));
+        }
+
+        return false;
     }
 
+    /**
+     * @param string $card
+     * @return bool
+     */
     public function compareCard(string $card){
         return $card == $this->state['card'];
     }
 
+    /**
+     * @return mixed
+     */
     public function myCard(){
         return $this->state['card'];
     }
 
+    /**
+     * @return mixed
+     */
     public function selectCard(){
-        $card = current($this->state['deck']);
-        if(!$this->compareCard($card)) {
-            array_shift($this->state['deck']);
-        }
+        $cardFactory = new Card();
+        $card = $cardFactory
+            ->set($this->state['deck'])
+            ->draftCard();
 
+        if(!$this->compareCard($card)) {
+            $this->state['deck'] = $cardFactory->get();
+        }
         $this->state['history'][] = $card;
 
         $this->save();
@@ -66,9 +97,11 @@ class GameRepository
         return $card;
     }
 
-    public function calculate(){
-        $chance = (1/ count($this->state['deck'])) * 100;
+    /**
+     * @return float
+     */
+    public function calculateChance(){
 
-        return round($chance);
+        return Calculator::calculate(count($this->state['deck']), 1);
     }
 }

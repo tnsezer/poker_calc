@@ -5,9 +5,9 @@
  * Date: 23.07.2018
  * Time: 20:55
  */
-namespace App\DependencyInjection;
+namespace App\Entity;
 
-use App\DependencyInjection\SuitInterface;
+use App\Entity\SuitInterface;
 class Suit implements SuitInterface
 {
     private $suit;

@@ -6,7 +6,7 @@
  * Time: 00:45
  */
 
-namespace App\DependencyInjection;
+namespace App\Entity;
 
 
 interface SuitInterface
