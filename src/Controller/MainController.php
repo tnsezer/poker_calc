@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use App\Entity\CardFactory;
+use App\Entity\Card;
 
 
 class MainController extends Controller
@@ -27,7 +27,7 @@ class MainController extends Controller
      */
     public function main(){
 
-        return $this->render('main.html.twig', ['suits' => CardFactory::SUITS, 'ranks' => CardFactory::RANKS]);
+        return $this->render('main.html.twig', ['suits' => Card::SUITS, 'ranks' => Card::RANKS]);
     }
 
     /**
