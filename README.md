@@ -10,4 +10,4 @@
 * run: composer install
 * run: php bin/console server:run
 * to go to http://127.0.0.1:8000/
-* to test: phpunit
+* to test: ./vendor/bin/simple-phpunit

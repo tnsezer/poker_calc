@@ -24,4 +24,11 @@
             <div>Selected card: {{ data.selectedCard }}</div>
         </div>
     {% endif %}
+    <br />
+    <div id="area4">
+        <div>History</div>
+        {% for card in data.history %}
+        <div>{{ card.get() }}</div>
+        {% endfor %}
+    </div>
 {% endblock %}

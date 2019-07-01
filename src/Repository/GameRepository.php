@@ -8,30 +8,47 @@
 namespace App\Repository;
 
 use Symfony\Component\HttpFoundation\Session\Session;
+use App\Entity\Deck;
 use App\Entity\Card;
 use App\Util\Calculator;
 
 class GameRepository
 {
-    public $state = [];
-    public $session;
 
     /**
-     * GameRepository constructor.
+     * @var array|mixed
      */
-    public function __construct()
+    private $state = [];
+
+    /**
+     * @var Session
+     */
+    private $session;
+
+    /**
+     * @var Deck
+     */
+    private $deck;
+
+    /**
+     * Constructor
+     *
+     * @param Deck $deck
+     */
+    public function __construct(Deck $deck)
     {
-        $this->session =  new Session();
+        $this->deck =  $deck;
+        $this->session = new Session();
         $state = $this->session->get('state');
         if($state){
-            $this->state = json_decode($state, true);
+            $this->state = unserialize($state);
         }
     }
 
     /**
      * @return bool
      */
-    public function reset(){
+    public function reset() {
         $this->session->remove("state");
         $this->state = [];
 
@@ -39,13 +56,12 @@ class GameRepository
     }
 
     /**
-     * @param string $cardName
+     * @param Card $card
      * @return array|mixed
      */
-    public function start(string $cardName){
-        $card = new Card();
-        $deck = $card->createDeck();
-        $this->state = ['deck' => $deck, 'card' => $cardName, 'history' => []];
+    public function start(Card $card) {
+        $deck = $this->deck->get();
+        $this->state = ['deck' => $deck, 'card' => $card->get(), 'history' => []];
 
         $this->save();
 
@@ -55,42 +71,50 @@ class GameRepository
     /**
      * @return bool
      */
-    private function save(){
+    private function save() {
         if($this->session) {
-            return $this->session->set('state', json_encode($this->state));
+            return $this->session->set('state', serialize($this->state));
         }
 
         return false;
     }
 
     /**
-     * @param string $card
+     * @param Card $card
      * @return bool
      */
-    public function compareCard(string $card){
-        return $card == $this->state['card'];
+    public function compareCard(Card $card) {
+        return $card->get() === $this->state['card'];
     }
 
     /**
      * @return mixed
      */
-    public function myCard(){
+    public function getMyCard(){
         return $this->state['card'];
     }
 
     /**
      * @return mixed
      */
-    public function selectCard(){
-        $cardFactory = new Card();
-        $card = $cardFactory
-            ->set($this->state['deck'])
+    public function getHistory(){
+        return $this->state['history'];
+    }
+
+    /**
+     * @return string
+     */
+    public function selectCard() {
+        $deck = $this->deck;
+        $card = $deck
+            ->except($this->state['history'])
             ->draftCard();
 
+        $cardName = $card->get();
         if(!$this->compareCard($card)) {
-            $this->state['deck'] = $cardFactory->get();
+            $this->state['deck'] = $deck->get();
         }
-        $this->state['history'][] = $card;
+        $this->state['history'][$cardName] = $card;
 
         $this->save();
 
@@ -100,8 +124,7 @@ class GameRepository
     /**
      * @return float
      */
-    public function calculateChance(){
-
+    public function calculateChance() {
         return Calculator::calculate(count($this->state['deck']), 1);
     }
 }

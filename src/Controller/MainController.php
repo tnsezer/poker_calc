@@ -12,7 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use App\Entity\Card;
+use App\Entity\Deck;
+use App\Entity\CardFactory;
 
 
 class MainController extends Controller
@@ -27,19 +28,28 @@ class MainController extends Controller
      */
     public function main(){
 
-        return $this->render('main.html.twig', ['suits' => Card::SUITS, 'ranks' => Card::RANKS]);
+        return $this->render('main.html.twig', ['suits' => Deck::SUITS, 'ranks' => Deck::RANKS]);
     }
 
     /**
      * @Route("/start", name="start")
+     *
+     * @param GameRepository $gameRepository
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function start(GameRepository $gameRepository, Request $request){
-        $myCard = $request->get("suit") . $request->get("rank");
-        $gameRepository->start($myCard);
+        $suit = $request->get("suit");
+        $rank = $request->get("rank");
+        $card = CardFactory::create($suit, $rank);
+        $gameRepository->start($card);
+        $history = $gameRepository->getHistory();
         $chance = $gameRepository->calculateChance();
 
         $data = [
-            'card' => $myCard,
+            'card' => $card->get(),
+            'history' => $history,
             'selectedCard' => '-',
             'chance' => $chance,
             'win' => 0
@@ -50,16 +60,22 @@ class MainController extends Controller
 
     /**
      * @Route("/draft", name="draft")
+     *
+     * @param GameRepository $gameRepository
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function draft(GameRepository $gameRepository){
         $card = $gameRepository->selectCard();
-        $myCard = $gameRepository->myCard();
+        $myCard = $gameRepository->getMyCard();
+        $history = $gameRepository->getHistory();
         $win = $gameRepository->compareCard($card);
         $chance = $gameRepository->calculateChance();
 
         $data = [
             'card' => $myCard,
-            'selectedCard' => $card,
+            'history' => $history,
+            'selectedCard' => $card->get(),
             'chance' => $chance,
             'win' => $win
         ];
@@ -69,6 +85,10 @@ class MainController extends Controller
 
     /**
      * @Route("/reset", name="reset")
+     *
+     * @param GameRepository $gameRepository
+     *
+     * @return RedirectResponse
      */
     public function reset(GameRepository $gameRepository){
         $gameRepository->reset();
